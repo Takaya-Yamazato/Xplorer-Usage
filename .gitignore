@@ -3,6 +3,7 @@ source
 *.png
 *.txt
 *.xls
+*.xlsx
 *.json
 # Byte-compiled / optimized / DLL files
 __pycache__/

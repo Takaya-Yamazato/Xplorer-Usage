@@ -81,16 +81,16 @@ IEEE Xplore Usage Statistics Scraper
   python scraper.py
 
 オプション:
-  --headless       ブラウザを非表示で実行（デフォルト: 表示あり）
+  --headed         ブラウザを表示して実行（デフォルト: 非表示）
   --output FILE    出力Excelファイル名（デフォルト: ieice_usage.xlsx）
   --delay FLOAT    リクエスト間の待機秒数（デフォルト: 2.0）
   --max-pages INT  各ジャーナルの最大ページ数（0=全ページ、デフォルト: 0）
   --doi DOI        特定のDOIのUsageを取得する（複数指定可）
-    python scraper.py --headless --doi 10.23919/comex.2023XBL0092 10.23919/comex.2023XBL0098
   --pub-year INT   特定の出版年の論文のみを取得する（例: 2024）
-    python scraper.py --headless --pub-year 2024
   --usage-year INT 月別Usageシートで特定の利用年のみを出力する（例: 2024）
-    python scraper.py --headless --usage-year 2024
+    python scraper.py --doi 10.23919/comex.2023XBL0092 10.23919/comex.2023XBL0098
+    python scraper.py --pub-year 2024
+    python scraper.py --usage-year 2024
 ```
 
 ---
