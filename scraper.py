@@ -600,6 +600,84 @@ def save_to_excel(df_all: pd.DataFrame, records: list[dict], output_path: str, u
         if max_rows > 0:
             row_cursor += max_rows
 
+    # ---- グラフ作成用データの追加 ----
+    df_chart = df_all.copy()
+    df_chart["year"] = pd.to_numeric(df_chart["year"], errors='coerce')
+    df_chart["month"] = pd.to_numeric(df_chart["month"], errors='coerce')
+    df_chart = df_chart.dropna(subset=["year", "month"])
+    df_chart = df_chart[df_chart["month"] > 0]
+
+    if not df_chart.empty:
+        # yyyy/mm の形式で文字列を作成
+        df_chart["date_str"] = df_chart["year"].astype(int).astype(str) + "/" + df_chart["month"].astype(int).astype(str).str.zfill(2)
+        
+        # 昇順ソートした全年月を取得
+        unique_dates = sorted(df_chart["date_str"].unique())
+        
+        row_cursor += 3  # 空白行をあける
+        
+        if ws_name in writer.sheets:
+            ws = writer.sheets[ws_name]
+            
+            ws.cell(row=row_cursor, column=1, value="【グラフ作成用データ】")
+            ws.cell(row=row_cursor, column=1).font = Font(bold=True, size=11)
+            row_cursor += 1
+            
+            target_metrics = [
+                ("Number of usage per issue", "total_usage", "sum"),
+                ("Number of articles", "total_usage", "count"),
+                ("Average usage per article", "total_usage", "mean"),
+                ("Number of citations per issue", "citation_count", "sum"),
+            ]
+            
+            for journal_name in unique_journals:
+                df_j = df_chart[df_chart["journal"] == journal_name]
+                ws.cell(row=row_cursor, column=1, value=journal_name)
+                ws.cell(row=row_cursor, column=1).font = Font(bold=True)
+                row_cursor += 1
+                
+                # ヘッダー行 (年月)
+                for j, d_str in enumerate(unique_dates):
+                    ws.cell(row=row_cursor, column=j+2, value=d_str)
+                row_cursor += 1
+                
+                # 月ごとに集計
+                if not df_j.empty:
+                    monthly_stats = df_j.groupby('date_str').agg(
+                        usage_sum=('total_usage', 'sum'),
+                        usage_count=('total_usage', 'count'),
+                        usage_mean=('total_usage', 'mean'),
+                        citation_sum=('citation_count', 'sum')
+                    )
+                else:
+                    monthly_stats = pd.DataFrame()
+
+                for label, col, agg in target_metrics:
+                    ws.cell(row=row_cursor, column=1, value=label)
+                    
+                    if agg == "sum" and col == "total_usage":
+                        stat_col = "usage_sum"
+                    elif agg == "count" and col == "total_usage":
+                        stat_col = "usage_count"
+                    elif agg == "mean" and col == "total_usage":
+                        stat_col = "usage_mean"
+                    elif agg == "sum" and col == "citation_count":
+                        stat_col = "citation_sum"
+                    else:
+                        stat_col = None
+
+                    for j, d_str in enumerate(unique_dates):
+                        val = 0
+                        if stat_col and d_str in monthly_stats.index:
+                            val = monthly_stats.loc[d_str, stat_col]
+                            if pd.isna(val):
+                                val = 0
+                            elif agg == "mean":
+                                val = round(val, 1)
+                        ws.cell(row=row_cursor, column=j+2, value=val)
+                    row_cursor += 1
+                row_cursor += 1  # ジャーナル間に1行空ける
+
     # ---- Sheet 2: 論文ごとの詳細 ----
     df_main = df_all.drop(columns=["biblio"], errors="ignore")
     df_main.to_excel(writer, sheet_name="論文詳細", index=False)
