@@ -1,9 +1,9 @@
 venv
 source
-./*.png
-./*.txt
-./*.xls
-./*.json
+*.png
+*.txt
+*.xls
+*.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
