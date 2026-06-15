@@ -78,6 +78,7 @@ IEEE Xplore Usage Statistics Scraper
   playwright install chromium
 
 実行方法:
+  source venv/bin/activate # 既に実行済みの場合は不要
   python scraper.py
 
 オプション:
