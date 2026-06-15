@@ -45,7 +45,8 @@ ieice_usage_scraper/
 ### ステップ 1：APIレスポンス構造の確認（初回のみ推奨）
 
 ```bash
-python debug_api.py
+python debug_api.py --doi 10.23919/comex.2023XBL0092 10.23919/comex.2023XBL0098　　# DOI指定モード 2 件
+python debug_api.py　# 全て
 ```
 
 ブラウザが開き、IEEE XploreのAPIを叩いて `debug_search.json` と  
