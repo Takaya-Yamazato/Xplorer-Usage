@@ -27,6 +27,7 @@ from playwright.sync_api import sync_playwright
 BASE_URL = "https://ieeexplore.ieee.org"
 SEARCH_API = BASE_URL + "/rest/search"
 ARTICLE_METRICS_API = BASE_URL + "/rest/document/{article_id}/metrics"
+ARTICLE_AUTHORS_API = BASE_URL + "/rest/document/{article_id}/authors"
 
 # IEICE Trans. Commun.
 PUNUMBER = "10400553"
@@ -186,6 +187,21 @@ def fetch_articles_by_doi(page, dois: list[str]) -> tuple[list[dict], list[dict]
         print(f"  タイトル: {title[:80]}")
         print(f"  DOI    : {art.get('doi', '')}")
 
+        # 著者情報（所属含む）を取得
+        time.sleep(1)
+        authors_data = fetch_json(page, ARTICLE_AUTHORS_API.format(article_id=article_id))
+        # 個別APIから取得できない場合は検索APIのフォールバックを使用
+        authors_list = authors_data.get("authors", art.get("authors", []))
+
+        if authors_list:
+            print("  著者・所属:")
+            for a in authors_list:
+                name = a.get("name", a.get("preferredName", "Unknown"))
+                affil = a.get("affiliation") or a.get("affiliations") or a.get("authorAffiliations") or ""
+                if isinstance(affil, list):
+                    affil = ", ".join(str(x) for x in affil)
+                print(f"    - {name}: {affil if affil else '所属情報なし'}")
+
         # メトリクス取得
         time.sleep(1)
         metrics = fetch_json(page, ARTICLE_METRICS_API.format(article_id=article_id))
@@ -236,6 +252,21 @@ def fetch_articles_default(page) -> tuple[dict, list[dict], list[dict]]:
         title = art.get("articleTitle", art.get("documentTitle", art.get("title", "")))
         title_short = title[:60]
         print(f"  [{i+1}/{len(articles)}] ID={article_id}  {title_short}...")
+
+        # 著者情報（所属含む）を取得
+        time.sleep(1)
+        authors_data = fetch_json(page, ARTICLE_AUTHORS_API.format(article_id=article_id))
+        # 個別APIから取得できない場合は検索APIのフォールバックを使用
+        authors_list = authors_data.get("authors", art.get("authors", []))
+
+        if authors_list:
+            print("       著者・所属:")
+            for a in authors_list:
+                name = a.get("name", a.get("preferredName", "Unknown"))
+                affil = a.get("affiliation") or a.get("affiliations") or a.get("authorAffiliations") or ""
+                if isinstance(affil, list):
+                    affil = ", ".join(str(x) for x in affil)
+                print(f"         - {name}: {affil if affil else '所属情報なし'}")
 
         time.sleep(1)
         metrics = fetch_json(page, ARTICLE_METRICS_API.format(article_id=article_id))
