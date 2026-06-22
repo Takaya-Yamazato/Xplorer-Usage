@@ -1,5 +1,6 @@
 venv
 source
+.DS_Store
 *.png
 *.txt
 *.xls
