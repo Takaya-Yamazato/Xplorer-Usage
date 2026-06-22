@@ -625,9 +625,12 @@ def save_to_excel(df_all: pd.DataFrame, records: list[dict], output_path: str, u
             
             target_metrics = [
                 ("Number of usage per issue", "total_usage", "sum"),
-                ("Number of articles", "total_usage", "count"),
                 ("Average usage per article", "total_usage", "mean"),
                 ("Number of citations per issue", "citation_count", "sum"),
+                ("Number of articles", "total_usage", "count"),
+                ("Average reference count", "reference_count", "mean"),
+                ("Average ieice_ref_count per issue", "ieice_ref_count", "mean"),
+                ("Average ieice_ref_ratio per issue", "ieice_ref_ratio", "mean"),
             ]
             
             for journal_name in unique_journals:
@@ -647,7 +650,10 @@ def save_to_excel(df_all: pd.DataFrame, records: list[dict], output_path: str, u
                         usage_sum=('total_usage', 'sum'),
                         usage_count=('total_usage', 'count'),
                         usage_mean=('total_usage', 'mean'),
-                        citation_sum=('citation_count', 'sum')
+                        citation_sum=('citation_count', 'sum'),
+                        reference_mean=('reference_count', 'mean'),
+                        ieice_ref_mean=('ieice_ref_count', 'mean'),
+                        ieice_ref_ratio_mean=('ieice_ref_ratio', 'mean')
                     )
                 else:
                     monthly_stats = pd.DataFrame()
@@ -663,6 +669,12 @@ def save_to_excel(df_all: pd.DataFrame, records: list[dict], output_path: str, u
                         stat_col = "usage_mean"
                     elif agg == "sum" and col == "citation_count":
                         stat_col = "citation_sum"
+                    elif agg == "mean" and col == "reference_count":
+                        stat_col = "reference_mean"
+                    elif agg == "mean" and col == "ieice_ref_count":
+                        stat_col = "ieice_ref_mean"
+                    elif agg == "mean" and col == "ieice_ref_ratio":
+                        stat_col = "ieice_ref_ratio_mean"
                     else:
                         stat_col = None
 
